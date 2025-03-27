@@ -1,0 +1,258 @@
+----TEST TESTDOME
+
+CREATE DATABASE TESTDOME 
+1) Ερώτημα 
+CREATE TABLE students
+(
+ students_id INT PRIMARY KEY, 
+ first_name VARCHAR(30) NOT NULL, 
+ last_name VARCHAR(30) NOT NULL
+);
+INSERT INTO students (students_id,first_name,last_name)
+VALUES 
+(1,'Dimitra','Tsiakiri'),
+(2,'Miltos','Chamalidis'),
+(3,'Antonis','Chamalidis'),
+(4,'Alexandros','Gazis');
+(5,'Dimitra','Milona'),
+(6,'Dimitra','Chamalidou'),
+(7,'Giannis','Chamalidis'),
+(8,'Giorgos','Gazis');
+Αν θέλαμε το students_id που ειναι το Primary key να γεμιζει απο μονο του θα λεγαμε 
+CREATE TABLE students
+(
+ students_id SERIAL PRIMARY KEY, 
+ first_name VARCHAR(30) NOT NULL, 
+ last_name VARCHAR(30) NOT NULL
+);
+INSERT INTO students (,first_name,last_name)
+VALUES 
+('Dimitra','Tsiakiri'),
+('Miltos','Chamalidis'),
+('Antonis','Chamalidis'),
+--(Alexandros','Gazis');
+
+
+/*Ζητείται να κανουμε ενα Query μεσα απο το οποίο να φερνούμε τον αριθμό τον μαθητων όπου το μικρό τους το όνομα ειναι Dimitra*/
+Προσοχη επείδη διευκρινίζεται ότι η βαση ειναι Casesensitive δεν μπορουμε να κανουμε το παρακατω
+SELECT COUNT(*)
+FROM students
+WHERE first_name = 'Dimitra';
+
+Πρεπει να κανουμε το εξης 
+SELECT COUNT(*)
+FROM students
+WHERE LOWER(first_name) = 'dimitra';  'Πρεπει το ονομα να το γραψουμε με μικρα γραμματα '
+
+2) Ερώτημα 
+CREATE TABLE enrollments
+(
+ enrollment_id INT PRIMARY KEY, 
+ year INT NOT NULL, 
+ students_ida INT NOT NULL
+);
+INSERT INTO enrollments(enrollment_id,year,students_ida)
+VALUES
+(5,2020,79  ),
+(11,2012,81 ), 
+(12,2013,89 ),
+(20,2020,103),
+(25,2012,104), 
+(30,2013,105),  
+(35,2015,106),
+(50,2014,107),  
+(75,2010,108),  
+(90,2016,109),  
+(100,2022,110)
+Ζητείται να γίνει Update του πεδίου Year. Η βαση δεδομένων εχει λάθος ημερομηνία για enrollment_id απο 20 εως 100 σε αυτα πρέπει να αλλαξει το Year σε  2015
+UPDATE enrollments
+SET year = 2015
+WHERE enrollment_id BETWEEN 20 AND 100;
+3) 
+CREATE TABLE dogs
+ (
+ id INT NOT NULL PRIMARY KEY, 
+ dogsname VARCHAR(50) NOT NULL 
+ 
+  );
+  CREATE TABLE cats
+ (
+ id INT NOT NULL PRIMARY KEY, 
+ catsname VARCHAR(50) NOT NULL 
+ 
+  );
+  INSERT INTO dogs(id,dogsname)
+  VALUES
+  (1,'Markos'),
+  (2,'Blacky'),
+  (3,'Victora'), 
+  (4,'Lexi');
+  INSERT INTO cats(id,catsname)
+  VALUES
+  (1,'Markou'),
+  (2,'poulidou'),
+  (3,'Lexi'),
+  (4,'Victora');
+  Ζητειται να δημιουργήθει ενα Query το οποίο θα φερνει  τα ονοματα των ζωων , αν εμφανιζεται πχ το ονομα Lexi 2 φορες με το Query ζητειται να εμφανιστει μονο μια φορα
+  SELECT dogs.dogsname 
+  FROM dogs
+  UNION 
+  SELECT cats.catsname FROM cats;
+ 4)
+ CREATE TABLE users
+ (
+   id SERIAL PRIMARY KEY, 
+   name VARCHAR(50) NOT NULL,
+   sex VARCHAR (10) NOT NULL
+ );
+ 
+ Αυτο σκεφτηκα να κανω εγω 
+ CREATE TABLE friends
+ (
+ user1 INT REFERENCES users(id),
+ user2 INT REFERENCES users (id)
+ 
+ );
+ 
+ Η Βελτιωμενη εκδοση του απο το Chatgtp 
+ CREATE TABLE friends (
+    user1 INT REFERENCES users(id),
+    user2 INT REFERENCES users(id),
+    PRIMARY KEY (user1, user2)
+);
+  
+  η ακομα καλυτερα 
+  
+  CREATE TABLE friends (
+    user1 INT REFERENCES users(id),
+    user2 INT REFERENCES users(id),
+    PRIMARY KEY (user1, user2),
+    CHECK (user1 < user2) -- Αυτό διασφαλίζει ότι κάθε σχέση εισάγεται μόνο μία φορά.
+);
+INSERT INTO users(name,sex)
+VALUES
+('Dimitra','female'),
+('Miltos','male'),
+('Antonis','male'),
+('Alexandros','male'),
+('Erietta', 'female'),
+('Dorita','female');
+INSERT INTO friends(user1,user2)
+VALUES
+(1,2),
+(2,3),
+(3,4),
+(5,6);
+
+Δινεται το παρακάτω Query 
+SELECT users.name,COUNT(*) as COUNT 
+FROM users
+LEFT JOIN friends ON users.id=friends.user1 OR users.id=friends.user2
+WHERE users.sex = 'female'
+GROUP BY users.id,users.name;
+Τι θα εμφανίσει το παραπανω Query? 
+
+5)
+
+CREATE TABLE sessions 
+(
+id SERIAL PRIMARY KEY, 
+user_id INT NOT NULL, 
+duration DECIMAL NOT NULL
+);
+INSERT INTO sessions (user_id, duration) VALUES 
+(1, 10.5),
+(1, 5.2),
+(2, 8.7),
+(3, 15.3),
+(3, 12.1),
+(4, 3.9),
+(4, 7.4),
+(5, 20.0),
+(5, 25.6),
+(5, 18.2),
+(6, 9.8),
+(7, 11.1),
+(8, 4.5),
+(8, 13.3);
+ Ζητείται να γίνει ενα QUERY το οποίο θα επιλέγει το user_id και τον μέσο όρο του duration για οποιον user_id εχει κάνει πάνω απο μία συνεδρία 
+SELECT user_id,AVG(duration),COUNT(*) AS COUNT
+FROM sessions
+GROUP BY user_id
+HAVING COUNT(*)>1;
+
+Ενα αλλό το οποίο δεν το σκεφτηκα και ειναι πολυ καλυτερη λύση ειναι η εξής 
+SELECT user_id,AVG(duration)
+FROM sessions
+GROUP BY user_id
+HAVING COUNT(user_id)>1;
+
+6) 
+
+CREATE TABLE sellers 
+(
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(30) NOT NULL,
+    rating INTEGER NOT NULL
+);
+
+CREATE TABLE items 
+(
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(30) NOT NULL,
+    sellerId INTEGER REFERENCES sellers(id)
+);
+INSERT INTO sellers (id, name, rating) VALUES 
+(1, 'John Doe', 85),
+(2, 'Alice Smith', 90),
+(3, 'Bob Johnson', 78),
+(4, 'Emily Davis', 92),
+(5, 'Michael Brown', 88);
+
+INSERT INTO items (id, name, sellerId) VALUES 
+(1, 'Laptop', 1),
+(2, 'Smartphone', 2),
+(3, 'Tablet', 1),
+(4, 'Headphones', 3),
+(5, 'Monitor', 2),
+(6, 'Keyboard', 4),
+(7, 'Mouse', 4),
+(8, 'Printer', 5),
+(9, 'Smartwatch', 3),
+(10, 'Camera', 5);
+Ζητείται να επιλέξω το όνομα κάθε ενος προιόντος και το όνομα κάθε ενος πωλήτη για εγγραφες οι οποίες εχουνε Rating πανω απο 4 
+SELECT sellers.name,items.name 
+FROM sellers 
+INNER JOIN items ON sellers.id = items.sellerId
+WHERE sellers.rating > 4 ; 
+7)
+CREATE TABLE employees 
+(
+id INT NOT NULL PRIMARY KEY ,
+manager_id INT REFERENCES employees(id),
+name VARCHAR(30) NOT NULL 
+);
+Ζητείται να γραψουμε ενα Query με τα ονοματα των υπαλλήλων που δεν ειναι Managers 
+
+ΠΡΟΣΟΧΗ στον πίνακα αυτον, βλέπουμε το εξής και Primary key και foreign key που κοιταει το Primary του ιδιου του πίνακα 
+Εστω ότι ο πίνακας μας ειναι ο ακολουθός 
+
+id manager_id  name 
+1   NULL       Dimitra
+2    1         Alexandros --O Αλεξανδρος εχει manager την Δημητρα
+3    1         Antonis    --O Αντώνης εχει manager την Δημητρα
+4    3         Erietta    --Η εριέττα εχει manager τον Αντώνη
+5   NULL       Miltos
+
+
+INSERT INTO employees (id, manager_id, name) 
+VALUES 
+(1, NULL, 'Alice'),    -- Alice είναι η CEO (δεν έχει manager)
+(2, 1, 'Bob'),         -- Bob αναφέρεται στην Alice
+(3, 1, 'Charlie'),     -- Charlie αναφέρεται στην Alice
+(4, 2, 'David'),       -- David αναφέρεται στον Bob
+(5, 2, 'Eve'),         -- Eve αναφέρεται στον Bob
+(6, 3, 'Frank');       -- Frank αναφέρεται στον Charlie
+SELECT name 
+FROM employees
+WHERE id NOT IN (SELECT manager_id FROM employees WHERE manager_id IS NOT NULL);
